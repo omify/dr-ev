@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoltBridge — Execution Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2026;
+    --border: #2a2d35;
+    --border2: #363a44;
+    --text: #e8e9ec;
+    --muted: #7a7f8e;
+    --dim: #4a4f5c;
+    --teal: #2dd4a0;
+    --teal-dim: #1a6b52;
+    --amber: #f5a623;
+    --amber-dim: #6b4710;
+    --blue: #5b9cf6;
+    --blue-dim: #1e3a6b;
+    --green: #6bcf7f;
+    --green-dim: #1e4a2b;
+    --accent: #2dd4a0;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 2.5rem 2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .logo span { color: var(--teal); font-style: italic; }
+  .header-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* PHASE TABS */
+  .tabs-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 0;
+  }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .tab:hover { border-color: var(--border2); color: var(--text); }
+  .tab.active { border-color: var(--teal); color: var(--teal); background: rgba(45, 212, 160, 0.07); }
+
+  /* MAIN CONTENT */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .phase-header { margin-bottom: 1.75rem; }
+  .phase-name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .phase-desc {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* PROGRESS */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .progress-track {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--teal);
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* TASK CARDS */
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .task-card:hover { border-color: var(--border2); }
+  .task-card.expanded { border-color: var(--border2); }
+  .task-card.completed { opacity: 0.45; }
+  .task-card.completed .task-name { text-decoration: line-through; }
+
+  .task-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .check-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    cursor: pointer;
+    background: transparent;
+  }
+  .check-box:hover { border-color: var(--teal); }
+  .check-box.done { background: var(--teal); border-color: var(--teal); }
+  .check-box.done::after {
+    content: '';
+    width: 5px;
+    height: 9px;
+    border: 2px solid #0e0f11;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+    display: block;
+  }
+
+  .task-info { flex: 1; min-width: 0; }
+  .task-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 2px; }
+  .task-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .badge-s { background: var(--blue-dim); color: var(--blue); }
+  .badge-h { background: var(--amber-dim); color: var(--amber); }
+  .badge-both { background: var(--green-dim); color: var(--green); }
+  .task-brief { font-size: 12px; color: var(--muted); }
+  .task-loc-inline {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 2px;
+  }
+  .expand-arrow {
+    font-size: 12px;
+    color: var(--dim);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .task-card.expanded .expand-arrow { transform: rotate(180deg); color: var(--teal); }
+
+  /* STEPS PANEL */
+  .steps-panel {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    padding: 1.25rem 1.5rem 1.5rem;
+    animation: slideDown 0.2s ease;
+  }
+  .task-card.expanded .steps-panel { display: block; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .steps-heading {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--teal);
+    margin-bottom: 1rem;
+  }
+  .steps-list { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: flex;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .step:last-child { border-bottom: none; padding-bottom: 0; }
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--teal);
+    min-width: 22px;
+    padding-top: 1px;
+    font-weight: 500;
+  }
+  .step-body { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .step-detail { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .step-tip {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--amber);
+    background: rgba(245, 166, 35, 0.08);
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+  .step-link {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .step-link:hover { text-decoration: underline; }
+
+  /* GLOBAL PROGRESS */
+  .global-bar {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem;
+  }
+  .global-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .global-track { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .global-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--blue)); transition: width 0.4s; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer p {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+  }
+  .reset-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .reset-btn:hover { color: var(--text); border-color: var(--border2); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Volt<span>Bridge</span></div>
+  <div class="header-meta">
+    <div id="global-stats">0 / 25 tasks complete</div>
+    <div>Belagavi → Series A</div>
+  </div>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="main">
+  <div class="phase-header">
+    <div class="phase-name" id="phase-name"></div>
+    <div class="phase-desc" id="phase-desc"></div>
+  </div>
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="prog-label">0 / 0</div>
+  </div>
+  <div class="task-list" id="task-list"></div>
+</div>
+
+<div class="global-bar">
+  <div class="global-label" id="global-label">overall progress — 0%</div>
+  <div class="global-track"><div class="global-fill" id="global-fill" style="width:0%"></div></div>
+</div>
+
+<footer>
+  <p>CSE = software · ENC = hardware · Both = together</p>
+  <button class="reset-btn" onclick="resetAll()">reset all</button>
+</footer>
+
+<script>
+const phases = [
+  {
+    label: "Phase 1",
+    name: "Validate before you build",
+    desc: "Month 1 — No code. Just ground truth.",
+    tasks: [
+      {
+        name: "Visit 5 EV fleet operators",
+        who: "both",
+        brief: "Talk to real fleet owners — Zomato, Blinkit, e-rickshaws",
+        loc: "Belagavi city, Hubli",
+        steps: [
+          { title: "Find your targets", detail: "Search Google Maps for 'Zomato delivery hub Belagavi' and 'electric vehicle rental Belagavi'. Write down 5–6 addresses. Also check OLA/Rapido partners near Tilakwadi and Shahu Nagar." },
+          { title: "Prepare 5 questions on paper", detail: "Write these exactly: (1) How many EVs do you run daily? (2) What breaks most? (3) Do you track battery health today? (4) Have you lost a vehicle to unexpected breakdown? (5) Would you pay ₹500/month per vehicle for breakdown alerts?", tip: "Don't use a phone form — paper feels less threatening and keeps the conversation natural." },
+          { title: "Show up in person, no appointment", detail: "Walk in between 10am–12pm or 3pm–5pm when operators are less busy. Introduce yourself as engineering students doing a research project on EV fleets. Don't pitch — just ask." },
+          { title: "Document on the spot", detail: "Write down their answers verbatim in a notebook within 5 minutes of leaving. Note their body language — were they frustrated when describing breakdowns? That emotion = pain = opportunity." },
+          { title: "Synthesize into a 1-pager", detail: "After all 5 visits: what was said by 3 or more people? That's real signal. Write: 'Operators in Belagavi lose X hours/week to Y problem.' This sentence becomes your product thesis.", link: "https://docs.google.com/document/create" }
+        ]
+      },
+      {
+        name: "Talk to 3 local EV mechanics",
+        who: "h",
+        brief: "Understand what diagnostic tools they currently use",
+        loc: "Shahapur, Udyambag repair clusters",
+        steps: [
+          { title: "Locate EV service centres", detail: "Search: 'Ather service centre Belagavi', 'TVS iQube service Belagavi', 'electric scooter repair Belagavi'. Also ask at any dealership where their service is done — many outsource to local garages." },
+          { title: "Bring a broken charger or cable as an icebreaker", detail: "Walk in asking for help with something small. This builds rapport before you start asking questions about their diagnostic process." },
+          { title: "Ask specifically about diagnostic tools", detail: "Ask: 'What do you use to check battery health?' and 'When a customer comes with a battery problem, how do you diagnose it?' Most will say 'we just guess' or 'we connect to the app' — both are valuable answers." },
+          { title: "Ask about OBD/CAN ports", detail: "Point at the scooter and ask: 'Is there a diagnostic port on this vehicle?' If they show you something, photograph it with permission. Note the connector type.", tip: "ENC partner: take photos of any wiring harness, connector, or port you see. These are reference points for Phase 2." },
+          { title: "Offer to share your findings later", detail: "End with: 'We're building something that might help you diagnose faster. Can I show you a prototype in 3 months?' Get a WhatsApp number. This is your first pilot relationship." }
+        ]
+      },
+      {
+        name: "Map EV registrations in Karnataka",
+        who: "s",
+        brief: "Find your TAM from VAHAN portal data",
+        loc: "Online — vahan.parivahan.gov.in",
+        steps: [
+          { title: "Go to VAHAN analytics portal", detail: "Visit vahan.parivahan.gov.in/vahan4dashboard — this is the government's public vehicle registration database. No login needed for aggregate data.", link: "https://vahan.parivahan.gov.in/vahan4dashboard" },
+          { title: "Filter by state and fuel type", detail: "Select: State = Karnataka, Fuel = Electric. Then filter by vehicle class: Two Wheelers. Note the total count and year-over-year growth rate." },
+          { title: "Break down by district", detail: "Look for Belagavi district specifically. If the portal doesn't show district-level, file an RTI for district-wise data — it's free and takes 30 days. For now, estimate: Belagavi ≈ 4–5% of Karnataka registrations based on population." },
+          { title: "Build a simple spreadsheet", detail: "Columns: District | Total EVs | YoY Growth | Est. Fleet Vehicles (10% of total). This becomes your TAM table in the pitch deck.", link: "https://sheets.google.com/create" },
+          { title: "Cross-check with news sources", detail: "Search 'EV registrations Karnataka 2024' on Google News. Government press releases often have sharper numbers. SMEV (Society of Manufacturers of EVs) also publishes state-wise data quarterly.", tip: "One credible number beats five estimated ones. Cite your source on every slide." }
+        ]
+      },
+      {
+        name: "Get hands on one target EV",
+        who: "h",
+        brief: "Physically understand the vehicle before reverse-engineering",
+        loc: "OLX, friends, or local dealers",
+        steps: [
+          { title: "Identify which EV to target first", detail: "Ola S1 Pro and Ather 450X have the largest Karnataka user base. Ather is more open to tinkerers. TVS iQube is simpler. Pick Ather 450X as your first target — better community documentation online." },
+          { title: "Find one to borrow", detail: "Post in Belagavi Facebook groups, college WhatsApp groups: 'Looking to borrow an Ather or Ola S1 for 1 hour for an engineering project.' Offer to pay ₹200 for the owner's time. Alternatively, visit an Ather dealership and ask for a test ride + 10 minutes of physical inspection." },
+          { title: "Locate the OBD/CAN port physically", detail: "On Ather 450X: there is a diagnostic port under the seat. On Ola S1: it's near the charging port area. Photograph the connector type. Note: is it OBD2 standard? Proprietary? 4-pin? 6-pin?", tip: "ENC: bring a connector identification guide. Download the open-source 'EV Teardown' PDFs for Ather from EVtechindia forums before your visit." },
+          { title: "Note the BMS location and wiring harness", detail: "The Battery Management System is usually in the floor panel. You don't need to open it — just understand where signals originate from. Photograph harness routing if possible." },
+          { title: "Document everything in a sketch", detail: "Hand-draw the vehicle layout: battery position, BMS position, CAN harness path, diagnostic port location. This sketch guides your Phase 2 hardware design." }
+        ]
+      },
+      {
+        name: "Write a 1-page validation brief",
+        who: "both",
+        brief: "Synthesize all findings into your real product spec",
+        loc: "Google Docs",
+        steps: [
+          { title: "Use this exact template", detail: "Section 1: Who we talked to (5 fleet operators, 3 mechanics — names optional). Section 2: Top 3 pain points heard repeatedly. Section 3: Evidence of willingness to pay (quotes, price anchors mentioned). Section 4: What we need to build first (the one thing everyone wanted).", link: "https://docs.google.com/document/create" },
+          { title: "Include at least 2 direct quotes", detail: "E.g.: 'Mechanic at Udyambag shop said: \"we just charge and hope for the best\"'. Real words from real people are more convincing than any projection." },
+          { title: "Write the falsification condition", detail: "Add a section: 'This plan is WRONG if...' e.g. 'if fleet operators are unwilling to give device access to their vehicles' or 'if Ather's API is completely locked.' This forces honest thinking." },
+          { title: "Share with 1 trusted senior or mentor", detail: "Find a final-year or M.Tech student in ENC/CSE who's worked on embedded systems. Ask them to poke holes in your plan. Their pushback is more valuable than encouragement.", tip: "KLE Tech's E-Cell and the startup incubation office sometimes has alumni mentors — knock on that door." },
+          { title: "Version it as V1 and date it", detail: "Name the file 'VoltBridge-Validation-Brief-V1-[date]'. You will revise this as you learn more. Having a dated V1 shows investors you iterate based on evidence, not ego." }
+        ]
+      }
+    ]
+  },
+  {
+    label: "Phase 2",
+    name: "Hardware prototype",
+    desc: "Month 1–3 — First signal captured from a real EV.",
+    tasks: [
+      {
+        name: "Learn CAN bus basics",
+        who: "h",
+        brief: "Understand frames, IDs, DBC files — 2 week self-study",
+        loc: "Online",
+        steps: [
+          { title: "Start with CSS Electronics free guides", detail: "Go to csselectronics.com/pages/can-bus-simple-intro-tutorial — read the full intro guide. It's the clearest CAN explanation available. Then read their 'OBD2 Explained' guide.", link: "https://www.csselectronics.com/pages/can-bus-simple-intro-tutorial" },
+          { title: "Watch Eric Evenchick's CAN Hacking series", detail: "Search YouTube: 'Eric Evenchick CAN bus hacking'. He covers: CAN frames, arbitration IDs, DBC files, and reverse-engineering methodology. Watch all 4 videos — total 90 minutes.", link: "https://www.youtube.com/results?search_query=Eric+Evenchick+CAN+bus" },
+          { title: "Download and study a sample DBC file", detail: "Search GitHub for 'opendbc' by Comma.ai — it's an open database of decoded CAN signals for 100+ vehicles. Even though your target EV isn't there, studying the format teaches you how signals are structured.", link: "https://github.com/commaai/opendbc" },
+          { title: "Install SavvyCAN on your laptop", detail: "SavvyCAN is a free, open-source CAN analysis tool. Download from savvycan.com. Familiarise yourself with the interface: log view, graph view, filter panel. You'll use this in Phase 2 captures.", link: "https://www.savvycan.com/" },
+          { title: "Take a quick quiz to confirm understanding", detail: "Before buying hardware, answer these: What is an arbitration ID? What is the difference between CAN 2.0A and 2.0B? What does a DBC file contain? What is a CAN frame's maximum data payload? If you can't answer all four, re-read the CSS Electronics guide.", tip: "You're ready for hardware when you can explain CAN to your CSE partner in 5 minutes." }
+        ]
+      },
+      {
+        name: "Order a CAN bus sniffer",
+        who: "h",
+        brief: "USB-CAN analyzer + OBD2 cables — ₹1500–3000",
+        loc: "Robu.in, Amazon India",
+        steps: [
+          { title: "Buy a USB-CAN analyzer", detail: "Search Robu.in for 'USB CAN analyzer' — the CANable or PEAK PCAN-USB clones work well at ₹1,500–2,500. Alternatively, Amazon India: search 'CAN bus USB analyzer'. Avoid the cheapest ₹300 clones — they drop frames.", link: "https://robu.in" },
+          { title: "Buy OBD2 connector cables", detail: "Buy: (1) OBD2 breakout cable (exposes all 16 pins — ₹300–400 on Amazon), (2) OBD2 female to DB9 adapter if your analyzer uses DB9. Search 'OBD2 breakout board' on Amazon India." },
+          { title: "Buy a DB9 to USB cable if needed", detail: "Check your analyzer's connector. If DB9: buy a USB-to-DB9 converter (₹150). Keep a wiring diagram of OBD2 pin-to-CAN mapping printed — Pin 6 = CAN-H, Pin 14 = CAN-L on standard OBD2.", tip: "Total budget for this task: keep under ₹3,500. Don't over-order — you'll iterate equipment as you learn." },
+          { title: "Download drivers and test on PC", detail: "Install the analyzer driver (usually CH340 or FTDI). Open SavvyCAN and connect the analyzer via USB. If it shows up in the device list — you're ready. No vehicle needed yet." },
+          { title: "Order ESP32 and SIM module simultaneously", detail: "While waiting for the CAN analyzer: order ESP32 DevKit V1 (₹380, Robu.in), SIM800L GSM module (₹350), and a breadboard + jumper wires kit (₹150). These are needed in parallel for the telemetry unit.", link: "https://robu.in/product/esp32-development-board/" }
+        ]
+      },
+      {
+        name: "Practice on a petrol car first",
+        who: "h",
+        brief: "Learn to decode RPM, speed before touching EV",
+        loc: "Belagavi — any car with OBD2",
+        steps: [
+          { title: "Find a post-2008 petrol car", detail: "All petrol/diesel cars sold in India after 2008 have OBD2. Ask family or a neighbour. A Maruti Swift, Honda City, or Hyundai i20 works perfectly. Any BSIV+ vehicle is fine." },
+          { title: "Connect analyzer to OBD2 port", detail: "The OBD2 port is under the dashboard, driver's side (usually). Plug in your breakout cable, connect to the USB-CAN analyzer, plug into laptop. Open SavvyCAN and click 'Connect'." },
+          { title: "Start the car and capture frames", detail: "With car running (engine on), click 'Play/Capture' in SavvyCAN. You should see frames flooding in. This is real CAN data. If you see nothing — check baud rate (try 500kbps for most cars).", tip: "If it still shows nothing: your car might use a different protocol (LIN or K-Line). Check via a free ELM327 OBD2 Bluetooth dongle + Torque app first." },
+          { title: "Identify RPM signal by correlation", detail: "Rev the engine. Watch for a frame whose value rises when you press the accelerator. That's likely the RPM signal. Note its arbitration ID. This is the core skill of CAN reverse engineering — correlation by stimulus." },
+          { title: "Decode one signal completely", detail: "Using SavvyCAN's 'Extract Frames' and manual bit-shifting — decode the RPM value to match the tachometer reading. Document: Arbitration ID, byte position, bit length, scale factor. Congratulations — you've done your first CAN decode." }
+        ]
+      },
+      {
+        name: "Attempt first EV CAN capture",
+        who: "h",
+        brief: "Capture raw frames — don't decode yet, just prove you can see data",
+        loc: "Belagavi — proceed carefully, legal check first",
+        steps: [
+          { title: "Do the legal check first (not optional)", detail: "Before touching the EV: send a WhatsApp message to a startup lawyer or a senior engineering professor asking: 'Is it legal to passively read CAN data from my own EV in India?' Passive reading (no modification) is generally legal, but get a verbal confirmation. This takes 1 day.", tip: "Contact Startup Belagavi network or KLE Tech faculty with EV/IoT research background for a quick opinion." },
+          { title: "Only proceed with owner consent", detail: "Use the vehicle you borrowed in Phase 1 Task 4. Get explicit verbal (or WhatsApp) permission from the owner: 'I want to plug a read-only diagnostic cable into your scooter's port for 15 minutes.' Document this consent." },
+          { title: "Try standard OBD2 connection first", detail: "Plug your OBD2 breakout cable into the diagnostic port you identified in Phase 1. Set baud rate to 250kbps first (common for EVs), then try 500kbps. Open SavvyCAN and capture for 2 minutes while someone else operates the scooter (throttle, braking)." },
+          { title: "If no data: try direct CAN tap", detail: "If OBD2 gives nothing, the manufacturer may use proprietary connectors. In that case, look for the CAN harness (two twisted wires near the battery). A direct tap (with test clips, no cutting) may show frames. Document what you find either way — 'no data' is a finding too.", tip: "Ather has a developer community. Search 'Ather CAN bus GitHub' — some members have partially documented protocols." },
+          { title: "Save and commit your capture file", detail: "Save the raw capture file from SavvyCAN (.csv or .log). Push it to a private GitHub repo immediately. Label it with date, vehicle, and baud rate used. This is your first real data artifact — protect it.", link: "https://github.com/new" }
+        ]
+      },
+      {
+        name: "Source ESP32 + GSM for telemetry",
+        who: "h",
+        brief: "Build edge device prototype, transmit dummy data to cloud",
+        loc: "Robu.in — consider 1 trip to SP Road Bangalore",
+        steps: [
+          { title: "Buy components from Robu.in", detail: "Order: ESP32 DevKit V1 (₹380), SIM800L GSM+GPRS module (₹350), 18650 Li-ion battery holder (₹80), 5V step-down converter (₹60), breadboard (₹80). Total: ~₹950.", link: "https://robu.in" },
+          { title: "Set up ESP32 Arduino environment", detail: "Install Arduino IDE. Add ESP32 board package via Board Manager. Test with the basic 'Blink' sketch first. Then install the TinyGSM library (for SIM800L) via Library Manager.", link: "https://www.arduino.cc/en/software" },
+          { title: "Get a Jio or BSNL data SIM", detail: "Get a basic prepaid SIM for the SIM800L module. Jio works well on SIM800L with these APN settings: APN=jionet, no username/password. Test GPRS by sending an HTTP GET to httpbin.org/get." },
+          { title: "Build a dummy data sender", detail: "Write an Arduino sketch that generates fake telemetry (random battery%, speed, temperature) and POSTs it as JSON to a cloud endpoint every 30 seconds. Use the free tier of api.thingspeak.com or your own Supabase endpoint (from Phase 3).", link: "https://thingspeak.com" },
+          { title: "Validate end-to-end transmission", detail: "Power the ESP32 from a phone charger, place it in another room, and confirm the data appears in your cloud dashboard. When you see live (fake) data in a browser — your edge-to-cloud pipeline is proven. This is your first infrastructure milestone.", tip: "If SIM800L is unreliable (common issue), consider switching to ESP32 + SIM7600 module (₹850 on Robu) — more stable for production." }
+        ]
+      }
+    ]
+  },
+  {
+    label: "Phase 3",
+    name: "Software foundation",
+    desc: "Month 1–3 — Cloud infra and dashboard skeleton.",
+    tasks: [
+      {
+        name: "Set up cloud infra (free tier)",
+        who: "s",
+        brief: "MQTT broker, PostgreSQL DB, REST API on free AWS/Supabase",
+        loc: "Online",
+        steps: [
+          { title: "Create a Supabase project (recommended)", detail: "Go to supabase.com, create a free account, start a new project. You get: PostgreSQL database, REST API (auto-generated), authentication, and real-time subscriptions — all free up to 500MB. This removes 80% of backend setup work.", link: "https://supabase.com" },
+          { title: "Create a 'telemetry' table", detail: "In Supabase Table Editor: create table 'telemetry' with columns: id (uuid, primary key), vehicle_id (text), timestamp (timestamptz), battery_pct (float), speed_kmh (float), temp_c (float), lat (float), lng (float). Enable Row Level Security." },
+          { title: "Set up an MQTT broker for device data", detail: "Use HiveMQ Cloud free tier (hivemq.com/mqtt-cloud) — gives you a hosted MQTT broker. Your ESP32 will publish to this. In Node.js/Python, subscribe and write to Supabase. Alternatively, use AWS IoT Core free tier (250k messages/month).", link: "https://www.hivemq.com/mqtt-cloud/" },
+          { title: "Write a bridge script", detail: "Write a Node.js script that: subscribes to MQTT topic 'voltbridge/+/telemetry', parses the JSON payload, and inserts it into Supabase via their JS client. Deploy this on Railway.app (free tier) so it runs 24/7.", link: "https://railway.app" },
+          { title: "Test the full pipeline with dummy ESP32 data", detail: "With your Phase 2 ESP32 sending MQTT messages: confirm rows appear in Supabase within 5 seconds. If yes — your data pipeline is live. Screen-record this moment — it's slide material for your first pitch." }
+        ]
+      },
+      {
+        name: "Build a basic dashboard (React/Next.js)",
+        who: "s",
+        brief: "Battery %, location on map, one alert — use mock data first",
+        loc: "Online — deploy to Vercel",
+        steps: [
+          { title: "Bootstrap with Next.js + Tailwind", detail: "Run: npx create-next-app@latest voltbridge-dashboard. Add Tailwind CSS. Add the Supabase JS client: npm install @supabase/supabase-js. Use Cursor IDE or VS Code with GitHub Copilot (free for students via GitHub Education Pack).", link: "https://education.github.com/pack" },
+          { title: "Build a battery gauge component", detail: "Create a BatteryGauge React component that takes a 0–100 value and renders a visual gauge. Use Recharts (npm install recharts) for a simple radial bar chart. Hard-code 73% first. Make it look clean before wiring to real data." },
+          { title: "Add a map with vehicle location", detail: "Use react-leaflet (free, OpenStreetMap — no API key needed): npm install react-leaflet leaflet. Show a single marker at the vehicle's last known GPS coordinates. Hard-code Belagavi coordinates (15.8497, 74.4977) first, then wire to Supabase.", link: "https://react-leaflet.js.org/" },
+          { title: "Build one alert card", detail: "Create a simple rule: if battery_pct < 20, show an alert card: 'Low battery — Vehicle XYZ needs charging.' This is your first AI-adjacent feature. Rules-based alerts come before ML-based ones." },
+          { title: "Deploy to Vercel and get a live URL", detail: "Run: npx vercel deploy. Your dashboard is now live at a .vercel.app URL. This URL goes in every email, every pitch, every conversation. A live link is 10x more convincing than a screenshot.", link: "https://vercel.com" }
+        ]
+      },
+      {
+        name: "Learn basic ML for anomaly detection",
+        who: "s",
+        brief: "fast.ai tabular + time-series anomaly — get to a working model",
+        loc: "Online — fast.ai",
+        steps: [
+          { title: "Start fast.ai Practical Deep Learning", detail: "Go to course.fast.ai — it's completely free. Start with Lesson 1. Focus especially on Chapter 9 (Tabular Data) and Chapter 15 (Time Series). You need about 3 weeks at 1.5 hrs/day.", link: "https://course.fast.ai/" },
+          { title: "Find a public EV/IoT anomaly dataset", detail: "Search Kaggle for 'EV battery dataset' or 'IoT sensor anomaly'. Download one CSV with time-series sensor readings. A good starter: NASA Battery Dataset or the CALCE battery dataset. You'll replace this with your own data later.", link: "https://www.kaggle.com/datasets?search=EV+battery" },
+          { title: "Train an isolation forest model on the dataset", detail: "Use scikit-learn's IsolationForest (not deep learning yet — simpler and explainable). Train it on 80% of the data. Test on 20%. Goal: flag rows that look anomalous. A 70% detection rate on fake data is a win at this stage." },
+          { title: "Save the model and wrap it in a FastAPI endpoint", detail: "Use joblib to save your trained model. Create a FastAPI app with one POST endpoint: /predict — takes a JSON payload of sensor readings, returns {anomaly: true/false, confidence: 0.87}. Deploy on Railway.app free tier.", link: "https://fastapi.tiangolo.com/" },
+          { title: "Connect the API to your dashboard", detail: "In your Next.js dashboard: when new telemetry arrives, call your FastAPI /predict endpoint. Display the result as a status badge. Now you have an 'AI-powered' dashboard — even if the model is simple. Simple + working > complex + broken.", tip: "When you have 30 days of real data from pilots, retrain the model on that data. Real data always beats public datasets." }
+        ]
+      },
+      {
+        name: "Connect hardware data to dashboard",
+        who: "both",
+        brief: "First end-to-end demo — record the moment it works",
+        loc: "Your room / college lab",
+        steps: [
+          { title: "Agree on a data schema between both of you", detail: "Sit together and define the JSON format your ESP32 will send: {vehicle_id, timestamp, battery_pct, speed_kmh, temp_c, lat, lng, can_raw: {}}. Both of you must agree on this — it's the API contract between hardware and software.", tip: "Put this schema in a shared Google Doc. Date it. When you change it, create V2. Schema drift is a common source of bugs." },
+          { title: "ENC: update ESP32 to send schema-compliant MQTT messages", detail: "Modify the Arduino sketch to publish JSON matching the agreed schema to HiveMQ. For now, lat/lng can be hardcoded Belagavi coordinates. CAN data can be an empty object. Timestamp from ESP32 NTP sync." },
+          { title: "CSE: update the bridge script to handle real vehicle_ids", detail: "Update the Node.js MQTT bridge to correctly parse vehicle_id from the topic path (e.g. 'voltbridge/VB001/telemetry' → vehicle_id = 'VB001'). Test with two different vehicle IDs simultaneously." },
+          { title: "Wire the dashboard to live Supabase rows", detail: "Replace all hardcoded mock data in the dashboard with real-time Supabase subscriptions. Use supabase.from('telemetry').on('INSERT', callback) for live updates. When the ESP32 is on, the dashboard should update without refreshing the page." },
+          { title: "Record a 90-second demo video", detail: "Record your screen showing: ESP32 powered on → MQTT message in HiveMQ console → row appearing in Supabase → battery gauge updating in dashboard. This video is your proof of concept. Send it to every mentor, professor, and family member. First round of feedback starts here.", tip: "Use OBS Studio (free) for screen recording. Add a voice-over explaining what's happening. No editing needed — raw is authentic." }
+        ]
+      },
+      {
+        name: "Apply for hackathons (VIT, MSRIT, SIH)",
+        who: "both",
+        brief: "Free mentors, hardware budgets, investor exposure",
+        loc: "Online — Bangalore hackathons",
+        steps: [
+          { title: "Track upcoming hackathons on Devfolio", detail: "Go to devfolio.co and filter by: India, Hardware, Energy/Sustainability. Set up email alerts. Top targets: Smart India Hackathon (SIH), HackBVB (BVB College Hubli), Hack the Future (VIT Vellore), and ABInBev Brewing a Better World.", link: "https://devfolio.co/hackathons" },
+          { title: "Prepare a 3-slide pitch deck for applications", detail: "Slide 1: Problem (fleet operators lose X hours to battery failures). Slide 2: Solution (VoltBridge — OBD device + AI dashboard). Slide 3: Team (CSE + ENC, 2nd sem, Belagavi). Keep it under 10MB PDF." },
+          { title: "Apply to Smart India Hackathon immediately", detail: "SIH runs annually — registrations open August-September. Register at sih.gov.in with your college. Your KLE Tech faculty coordinator must approve the team. Start this conversation with your department early.", link: "https://www.sih.gov.in/" },
+          { title: "Target iDEX (Innovation for Defence Excellence)", detail: "iDEX has a student startup track with grants up to ₹1.5Cr for IoT/connectivity solutions. EV fleet management for defence logistics is a real use case. Apply at idex.gov.in. This is a long shot but worth 30 minutes of effort.", link: "https://idex.gov.in/" },
+          { title: "Email 3 Belagavi/Hubli startup mentors", detail: "Search LinkedIn for 'startup founder Belagavi' or 'CTO Karnataka EV'. Send a 5-line cold message: who you are, what you're building, one specific question you need answered. Ask for 20 minutes on a call. 1 in 10 will respond — that's enough.", tip: "Subject line that works: 'KLE Tech students building EV fleet monitoring — quick question on [specific topic]'" }
+        ]
+      }
+    ]
+  },
+  {
+    label: "Phase 4",
+    name: "Pilot and early traction",
+    desc: "Month 3–6 — One paying or LOI-signed customer.",
+    tasks: [
+      {
+        name: "Identify 2 pilot fleet operators",
+        who: "both",
+        brief: "From Phase 1 interviews — most excited ones first",
+        loc: "Belagavi or Hubli",
+        steps: [
+          { title: "Review Phase 1 interview notes", detail: "Who showed the most pain? Who asked 'when will this be ready?' Who asked for your number unprompted? Those are your pilots. Rank your 5 operators by enthusiasm × fleet size." },
+          { title: "Prepare a one-page pilot proposal", detail: "Title: 'VoltBridge — 30-Day Free Pilot Programme'. Include: what you'll install (small OBD device), what they'll see (battery health, breakdown prediction), what you need from them (2–3 vehicles, 30 days, 30 minutes of their time per week for feedback). No money asked.", link: "https://docs.google.com/document/create" },
+          { title: "Meet them in person with a working demo", detail: "Bring a laptop showing your live dashboard (even with mock data is fine). Show the video you recorded in Phase 3 Task 4. Having something real to show changes the conversation completely." },
+          { title: "Get a signed Letter of Intent (LOI) if they're hesitant", detail: "An LOI says: 'We agree to pilot VoltBridge on 3 vehicles for 30 days starting [date].' It's not a contract — it's a commitment signal. Download a free startup LOI template from Clerky or LegalZoom.", tip: "An LOI from a real company — even a small one — unlocks mentors, grants, and investor conversations that cold emails never can." },
+          { title: "Set up a pilot tracking sheet", detail: "Create a Google Sheet: Vehicle ID | Install Date | Issues Found | Driver Feedback | Dashboard Bugs. Review it weekly with your partner. This data becomes your case study in Phase 4 Task 4.", link: "https://sheets.google.com/create" }
+        ]
+      },
+      {
+        name: "Install device on pilot vehicles",
+        who: "h",
+        brief: "Mount ESP32+CAN device — expect it to break, that's the point",
+        loc: "Pilot operator location",
+        steps: [
+          { title: "Build a weatherproof enclosure", detail: "Buy a small ABS junction box (₹80 at any electrical shop) and drill holes for cables. Mount the ESP32 and SIM800L inside. Use hot glue to secure components. Add a rubber grommet where cables exit." },
+          { title: "Power from vehicle 12V supply", detail: "EVs have a 12V accessory supply (even though the main battery is 48V/72V). Tap into this for device power via a DC-DC converter (12V to 5V, ₹60 on Amazon). This ensures the device powers on/off with the vehicle." },
+          { title: "Connect to the CAN/OBD port", detail: "Use the cable and connector type you identified in Phase 1 Task 4. If OBD2: use your breakout cable. If proprietary: use test clip leads first (non-destructive). Label every connection with electrical tape and a marker." },
+          { title: "Test for 48 hours before leaving it", detail: "After installation: monitor the dashboard for 48 hours. Check: is data coming in every 30 seconds? Any gaps? Any reboots (check MQTT reconnection count)? Fix issues before leaving the device unattended.", tip: "Bring a mobile hotspot as a backup if the SIM800L GPRS drops. GSM signal in vehicle parking areas can be weak." },
+          { title: "Leave a WhatsApp number with the operator", detail: "Give the operator your personal number and say: 'If anything with the device looks wrong or if there's a warning light, text me immediately.' This responsiveness builds trust and gets you urgent real-world data." }
+        ]
+      },
+      {
+        name: "Collect 30 days of real telemetry",
+        who: "both",
+        brief: "Let it run — this data trains your model and proves the pitch",
+        loc: "Cloud dashboard",
+        steps: [
+          { title: "Set up automated daily data quality checks", detail: "Write a simple Python script that runs daily (cron job on Railway.app) — checks if each vehicle has sent at least 50 readings that day. If not, alerts you on WhatsApp using Twilio or a free WhatsApp webhook.", link: "https://www.twilio.com/" },
+          { title: "Log every anomaly manually at first", detail: "For the first 2 weeks, manually review each day's data in a spreadsheet. Flag unusual patterns: sudden battery drops, abnormal temperatures, zero-speed high-RPM events. These manual labels become training data for your ML model." },
+          { title: "Interview operators weekly during the pilot", detail: "Every 7 days: 15-minute call or visit. Ask: 'Did your driver notice anything unusual with the vehicles this week?' Cross-reference with what your dashboard showed. Calibrate: did your alert fire when something real happened?" },
+          { title: "Calculate 3 metrics at end of 30 days", detail: "Metric 1: Alert Precision (of the alerts you fired, what % were real issues?). Metric 2: Breakdowns during pilot vs same period last year. Metric 3: Battery degradation trend detected. These three numbers are your results section.", tip: "Even one prevented breakdown with a ₹5,000 repair cost = ₹5,000 value created. That's your ROI calculation." },
+          { title: "Export the dataset and begin retraining ML model", detail: "Export 30 days of telemetry as CSV. Retrain your Isolation Forest (or upgrade to LSTM for time-series anomaly) on this real data. Compare performance to the model trained on public data. Document the improvement in a notebook.", link: "https://colab.research.google.com/" }
+        ]
+      },
+      {
+        name: "Write a 1-page pilot case study",
+        who: "s",
+        brief: "'Fleet X saved Y hours/money using VoltBridge'",
+        loc: "Google Docs",
+        steps: [
+          { title: "Use the storytelling formula", detail: "Paragraph 1: Who is the operator and what problem did they face before VoltBridge? Paragraph 2: What did you install and how long did it take? Paragraph 3: What did the data reveal? Paragraph 4: What was the outcome — time saved, cost avoided, driver confidence? Keep under 300 words total.", link: "https://docs.google.com/document/create" },
+          { title: "Get a quote from the operator", detail: "Ask the operator: 'In one sentence, what's the most useful thing VoltBridge told you?' That quote goes at the top of the case study as a pull quote. Real names need permission — if they prefer, use 'Fleet operator, Belagavi' as attribution." },
+          { title: "Add 2 charts from real data", detail: "Chart 1: Battery health trend over 30 days (line chart). Chart 2: Number of alerts fired vs real issues confirmed (precision bar chart). Make them in Google Sheets or matplotlib. Clean, simple, no 3D effects." },
+          { title: "Design a clean 1-page PDF", detail: "Use Canva free tier — search their templates for 'Case Study One-Pager'. Replace text and charts with yours. Export as PDF. This is now your sales leave-behind document.", link: "https://www.canva.com/templates/?query=case+study" },
+          { title: "Publish on LinkedIn (optional but powerful)", detail: "Post a 3-paragraph LinkedIn summary of the case study. Tag the location (Belagavi, Karnataka). Use hashtags: #EVtech #FleetManagement #StartupIndia #KarnatakaTech. India's EV investor community actively monitors LinkedIn. One viral post can unlock 10 investor intros." }
+        ]
+      },
+      {
+        name: "Apply to ELEVATE Karnataka / Startup India Seed",
+        who: "both",
+        brief: "₹50L non-dilutive grant — apply to all three schemes",
+        loc: "Online",
+        steps: [
+          { title: "Apply to ELEVATE Karnataka", detail: "Go to elevate.karnataka.gov.in — Karnataka's flagship startup grant programme. Student teams are eligible. Grant: ₹25–50 Lakhs, non-dilutive. Applications open annually (usually March–May). You need: registered entity, 2-page concept note, 5-minute pitch.", link: "https://elevate.karnataka.gov.in/" },
+          { title: "Register as a startup on Startup India", detail: "Go to startupindia.gov.in and register. This gives you: DPIIT recognition letter, tax benefits, free tools (AWS/Azure credits, legal help). Required for most grants. Takes 3–5 days once documents are ready.", link: "https://www.startupindia.gov.in/" },
+          { title: "Apply to Startup India Seed Fund", detail: "SISFS gives up to ₹20 Lakhs to early-stage startups through incubators. Find an empanelled incubator near you (KLE Tech might be one — check the SISFS list). Your incubator applies on your behalf.", link: "https://seedfund.startupindia.gov.in/" },
+          { title: "Register a company (LLP or Pvt Ltd)", detail: "You need a legal entity for all grants. LLP is cheaper to register (₹2,000–3,000) and maintain. Use LegalWiz.in or StartupLane for student-friendly pricing. Register in Karnataka — it simplifies ELEVATE eligibility.", link: "https://www.legalwiz.in/" },
+          { title: "Apply to KLE Tech's incubation cell", detail: "KLE Technological University has an incubation centre. Walk in and introduce yourselves. Being incubated at your own college gives you: free workspace, lab access, mentors, and the credibility of an institutional stamp. This is step zero — do it before external grant applications.", tip: "Ask your HOD or a faculty supervisor to be your 'mentor of record' for grant applications. A faculty name increases approval chances significantly." }
+        ]
+      }
+    ]
+  },
+  {
+    label: "Phase 5",
+    name: "Fundraise-ready",
+    desc: "Month 6–12 — Series A story written.",
+    tasks: [
+      {
+        name: "Convert 1 pilot to paid customer",
+        who: "both",
+        brief: "Even ₹2,000/month per vehicle is revenue — kills every objection",
+        loc: "Belagavi / Hubli",
+        steps: [
+          { title: "Calculate the value you've created for the pilot", detail: "Total up: breakdowns prevented × average repair cost + hours of driver downtime avoided × hourly wage. Present this as a 'Value Created Report' — even a rough ₹8,000 in saved costs justifies ₹2,000/month subscription easily." },
+          { title: "Price at a fraction of demonstrated value", detail: "If you saved them ₹8,000 in 30 days: ask for ₹1,500–2,000/month per vehicle. This is a 4x–5x value-to-price ratio — almost impossible to say no to. Don't price lower out of insecurity; it signals low confidence in your product." },
+          { title: "Offer a 3-month upfront discount", detail: "Say: 'Pay for 3 months upfront (₹5,400) and get 4 months of service.' This gives you cash flow visibility and tests real payment commitment. Even ₹5,400 in the bank is a milestone." },
+          { title: "Issue a proper invoice", detail: "Use Zoho Invoice (free) or Vyapar app (₹0 for basic). Issue a GST invoice with your company registration number. This makes revenue official and reportable to investors.", link: "https://www.zoho.com/in/invoice/" },
+          { title: "Document the conversion story", detail: "Write 3 bullet points: (1) pilot start date, (2) what evidence you showed to justify payment, (3) date of first payment. This goes in your data room. The story arc — free pilot → paid customer — is the most compelling thing you can show a seed investor." }
+        ]
+      },
+      {
+        name: "File a provisional patent",
+        who: "both",
+        brief: "KLE Tech IP cell — ₹1,600 student fee, creates a date-stamped moat",
+        loc: "KLE Tech IP Cell, Belagavi",
+        steps: [
+          { title: "Visit KLE Tech's IPR cell", detail: "KLE Technological University has an Intellectual Property Rights (IPR) facilitation cell. Visit the Research & Development office (Administrative Block). Ask for the faculty coordinator for startup IP. They guide student patent filing at subsidised rates." },
+          { title: "Understand what to patent", detail: "You can't patent 'CAN bus reading' — it's prior art. You CAN patent: your specific hardware adapter design, your signal correlation methodology for undocumented EV protocols, or your anomaly detection approach applied to EV telemetry. The more specific, the better." },
+          { title: "Write a 3-paragraph invention disclosure", detail: "Write: (1) What problem does it solve? (2) What makes your approach novel? (3) What prior art exists and why yours is different? This is the core of any patent. The IPR cell will help formalize it into proper patent language." },
+          { title: "File a Provisional Patent Application (Form 2)", detail: "Submit Form 2 to the Indian Patent Office (ipindia.gov.in) with a ₹1,600 student fee. A provisional gives you 12 months to file the complete specification. Date of provisional = your priority date. This is your legal moat.", link: "https://ipindiaonline.gov.in/" },
+          { title: "Mention it in every pitch as regulatory moat", detail: "In your investor deck: 'Patent Pending — Indian Provisional Patent filed [date] for adaptive CAN protocol reverse-engineering methodology.' This signals seriousness and defensibility. It takes 2 weeks and ₹1,600. There is no reason not to do this.", tip: "Ask a 4th-year ENC or CSE student who's published a paper to help write the technical description. Academic writing experience is useful here." }
+        ]
+      },
+      {
+        name: "Approach NASSCOM 10K Startups",
+        who: "s",
+        brief: "Cloud credits, mentorship, investor connects — free to apply",
+        loc: "Online",
+        steps: [
+          { title: "Apply to NASSCOM 10K Startups programme", detail: "Go to 10000startups.com. This is India's largest startup support programme — gives cloud credits (AWS, Azure, GCP), legal help, co-working access, and direct investor introductions. Student startups are actively welcomed.", link: "https://10000startups.com/" },
+          { title: "Apply to iCreate Ahmedabad", detail: "iCreate (icreate.res.in) is a government incubator that accepts teams nationwide. They provide: ₹5–10L seed, lab space, mentors, and international exposure programmes. Application is online. Strong hardware focus makes VoltBridge a fit.", link: "https://icreate.res.in/" },
+          { title: "Join the Ather and EV tech communities", detail: "Join: Forum.electricvehicles.in, Team-BHP EV section, and the Ather Community Forum. Introduce yourself as a student building fleet monitoring. Ask questions about CAN protocols publicly — you'll get expert help and visibility simultaneously." },
+          { title: "Contact T-Hub Hyderabad for the EV cohort", detail: "T-Hub (t-hub.co) runs dedicated EV and mobility startup cohorts. They connect startups directly to OEMs like Ola and Ather. Being in a T-Hub cohort gives you OEM access that's otherwise impossible at student stage.", link: "https://t-hub.co/" },
+          { title: "Submit to YC Startup School (free, always open)", detail: "Y Combinator's Startup School is completely free and open to all. Submit your startup at startupschool.org — you get: weekly video curriculum, group sessions with YC partners, and if you're lucky, an interview for the main YC batch.", link: "https://www.startupschool.org/" }
+        ]
+      },
+      {
+        name: "Build your Series A data room",
+        who: "both",
+        brief: "MRR, churn, vehicles monitored, anomalies caught — start this now",
+        loc: "Google Drive",
+        steps: [
+          { title: "Create a structured Google Drive folder", detail: "Folder structure: /VoltBridge-DataRoom / Company (incorporation docs, PAN, GSTIN) / Product (demo video, dashboard screenshots, architecture diagram) / Traction (pilot case study, MRR chart, customer LOIs) / Team (both bios, LinkedIn) / Financials (burn rate, runway).", link: "https://drive.google.com/" },
+          { title: "Start a KPIs spreadsheet from day 1", detail: "Columns: Month | MRR (₹) | Vehicles Monitored | Alerts Fired | Precision % | Pilots | Paying Customers | Burn (₹) | Runway (months). Update this every month. Even 3 months of data shows a trend. Investors look for direction, not absolute size." },
+          { title: "Write a 2-page company brief", detail: "This is NOT a pitch deck. It's a factual summary: problem, solution, traction to date, team, ask. Investors read this before agreeing to a call. Keep it jargon-free. If your grandmother can't understand the problem statement, rewrite it." },
+          { title: "Build a 10-slide pitch deck", detail: "Standard seed deck: (1) Cover (2) Problem (3) Solution (4) Product demo (5) Market size (6) Business model (7) Traction (8) Team (9) Roadmap (10) Ask. Use Pitch.com (free for students) — better looking than Google Slides.", link: "https://pitch.com/" },
+          { title: "Get the deck reviewed by 3 people before sending", detail: "Person 1: a non-technical friend (can they understand slide 2?). Person 2: a senior engineer or tech founder (is the solution credible?). Person 3: a business/commerce student (is the market size believable?). Revise after each review.", tip: "The slide investors remember most: Traction. Make slide 7 the most data-dense, honest, and specific slide in the deck. No vanity metrics." }
+        ]
+      },
+      {
+        name: "Get legal review on CAN reverse-engineering",
+        who: "both",
+        brief: "Startup lawyer, ₹3–5K for 1-hour consult — do before Month 3",
+        loc: "Online / Bangalore",
+        steps: [
+          { title: "Understand the legal landscape first", detail: "In India, the key laws are: IT Act 2000 (Section 43 — unauthorized access), Copyright Act (software protection), and Contracts Act (vehicle T&Cs). Passive reading of CAN data you don't modify is generally low-risk but not zero-risk — hence this task." },
+          { title: "Find a startup-friendly IP/tech lawyer", detail: "Options: LegalWiz.in (has a startup legal package, ~₹2,000 for a consult), iRunway (IP specialists), or a freelance tech lawyer on Vakil Search. Alternatively, NLU Dharwad (National Law University) is near Belagavi — their tech law faculty may consult for free.", link: "https://www.legalwiz.in/" },
+          { title: "Prepare specific questions for the consult", detail: "Ask: (1) Is passive CAN bus reading on a vehicle I own or have permission to access legal in India? (2) Do OEM Terms & Conditions restrict third-party diagnostic access legally? (3) Can we commercially sell data derived from CAN signals? (4) What does 'unauthorized access' mean under IT Act Section 43 in our context?" },
+          { title: "Get a written legal opinion (1 page)", detail: "Ask the lawyer to provide a brief written opinion — even a 1-page email summary is sufficient. This document goes in your data room and shows investors you've done legal due diligence. It removes a common investor concern at seed stage." },
+          { title: "Draft a vehicle owner consent form based on the opinion", detail: "Based on legal guidance, draft a simple 1-page consent form that fleet operators sign before you install your device. It should cover: data ownership, access scope, liability. Simple plain-English language. Get the lawyer to review it. This becomes part of your onboarding process.", tip: "Having a consent form actually makes pilots easier — it professionalises the conversation and signals you're serious about building a real company, not a student project." }
+        ]
+      }
+    ]
+  }
+];
+
+const STORAGE_KEY = 'voltbridge_v2';
+let currentPhase = 0;
+let expanded = {};
+let checked = {};
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    checked = s.checked || {};
+    currentPhase = s.phase || 0;
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ checked, phase: currentPhase }));
+  } catch(e) {}
+}
+
+function totalAll() {
+  return phases.reduce((a,p) => a + p.tasks.length, 0);
+}
+
+function doneAll() {
+  let d = 0;
+  phases.forEach((p, pi) => p.tasks.forEach((t, ti) => { if(checked[`${pi}-${ti}`]) d++; }));
+  return d;
+}
+
+function donePhase(pi) {
+  return phases[pi].tasks.filter((t, ti) => checked[`${pi}-${ti}`]).length;
+}
+
+function updateGlobal() {
+  const total = totalAll(), done = doneAll();
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('global-stats').textContent = `${done} / ${total} tasks complete`;
+  document.getElementById('global-label').textContent = `overall progress — ${pct}%`;
+  document.getElementById('global-fill').style.width = pct + '%';
+}
+
+function renderTabs() {
+  const el = document.getElementById('tabs');
+  el.innerHTML = '';
+  phases.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (i === currentPhase ? ' active' : '');
+    const done = donePhase(i), total = p.tasks.length;
+    btn.textContent = `${p.label} ${done}/${total}`;
+    btn.onclick = () => { currentPhase = i; saveState(); renderTabs(); renderMain(); };
+    el.appendChild(btn);
+  });
+}
+
+function renderMain() {
+  const p = phases[currentPhase];
+  document.getElementById('phase-name').textContent = p.name;
+  document.getElementById('phase-desc').textContent = p.desc;
+  const done = donePhase(currentPhase), total = p.tasks.length;
+  document.getElementById('prog-fill').style.width = (total ? done/total*100 : 0) + '%';
+  document.getElementById('prog-label').textContent = `${done} / ${total} done`;
+
+  const list = document.getElementById('task-list');
+  list.innerHTML = '';
+
+  p.tasks.forEach((task, ti) => {
+    const id = `${currentPhase}-${ti}`;
+    const isDone = !!checked[id];
+    const isExpanded = !!expanded[id];
+
+    const badgeClass = task.who === 's' ? 'badge-s' : task.who === 'h' ? 'badge-h' : 'badge-both';
+    const badgeLabel = task.who === 's' ? 'CSE' : task.who === 'h' ? 'ENC' : 'Both';
+
+    const card = document.createElement('div');
+    card.className = `task-card${isDone ? ' completed' : ''}${isExpanded ? ' expanded' : ''}`;
+    card.id = `card-${id}`;
+
+    const stepsHTML = task.steps.map((s, si) => `
+      <div class="step">
+        <div class="step-num">0${si+1}</div>
+        <div class="step-body">
+          <div class="step-title">${s.title}</div>
+          <div class="step-detail">${s.detail}</div>
+          ${s.tip ? `<div class="step-tip">↗ ${s.tip}</div>` : ''}
+          ${s.link ? `<a class="step-link" href="${s.link}" target="_blank">${s.link.replace('https://','').split('/')[0]} ↗</a>` : ''}
+        </div>
+      </div>`).join('');
+
+    card.innerHTML = `
+      <div class="task-row" data-id="${id}">
+        <div class="check-box${isDone ? ' done' : ''}" data-check="${id}"></div>
+        <div class="task-info">
+          <div class="task-top">
+            <span class="task-name">${task.name}</span>
+            <span class="badge ${badgeClass}">${badgeLabel}</span>
+          </div>
+          <div class="task-brief">${task.brief}</div>
+          <div class="task-loc-inline">📍 ${task.loc}</div>
+        </div>
+        <div class="expand-arrow">▾</div>
+      </div>
+      <div class="steps-panel">
+        <div class="steps-heading">execution steps</div>
+        <div class="steps-list">${stepsHTML}</div>
+      </div>`;
+
+    card.querySelector('[data-check]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      checked[id] = !checked[id];
+      saveState();
+      renderTabs();
+      renderMain();
+      updateGlobal();
+    });
+
+    card.querySelector('.task-row').addEventListener('click', (e) => {
+      if(e.target.closest('[data-check]')) return;
+      expanded[id] = !expanded[id];
+      card.classList.toggle('expanded', !!expanded[id]);
+    });
+
+    list.appendChild(card);
+  });
+
+  updateGlobal();
+}
+
+function resetAll() {
+  if(confirm('Reset all progress? This cannot be undone.')) {
+    checked = {};
+    expanded = {};
+    saveState();
+    renderTabs();
+    renderMain();
+    updateGlobal();
+  }
+}
+
+loadState();
+renderTabs();
+renderMain();
+updateGlobal();
+</script>
+</body>
+</html>
